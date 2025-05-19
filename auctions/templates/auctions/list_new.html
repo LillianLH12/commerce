@@ -1,0 +1,10 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h1> Add Your Item</h1>
+    <form action="{% url 'list_new' %}" method = "post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ new_list_form.as_p }}
+        <input type="submit" value="Add This Item">
+    </form>
+{% endblock %}

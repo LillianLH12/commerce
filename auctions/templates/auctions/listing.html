@@ -1,0 +1,87 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    {% if message %}
+    <div class="alert alert-danger" role="alert">
+        {{ message }}
+    </div>
+    {% endif %}
+    <h2 class="mb-4">{{ item.title }}</h2>
+
+    <div class="row">
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 shadow-sm">
+
+                {% if item.image %}
+                <img src="{{ item.image.url }}" class="card-img-top img-fluid"
+                style="height: 600px; object-fit: cover;" alt="{{ item.title }}">
+                {% endif %}
+
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">{{ item.title }}</h5>
+                    <p class="text-muted mb-1">Seller: {{ item.seller.username }}</p>
+
+                    {% if item.category %}
+                    <p class="text-muted mb-1">Category: {{ item.category }}</p>
+                    {% else %}
+                    <p class="text-muted mb-1">Category: Not Provided </p>
+                    {% endif %}
+
+                    <p class="card-text">{{ item.description }}</p>
+                    <p><strong>Starting Bid: ${{ item.starting_bid}}</strong></p>
+                    
+                    {% if not item.is_closed %}
+                    <p><strong>Current Bid: $ {{ bid_price }}</strong></p>
+                    
+                    <form action="{% url 'toggle_watchlist' item.id %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-success">
+                            {% if in_watchlist %}
+                                - Remove from Watchlist
+                            {% else %}
+                                + Add to Watchlist
+                            {% endif %}
+                        </button>
+                    </form>
+                    <form action="{% url 'bidding' item.id %}" method="post">
+                        {% csrf_token %}
+                        {{ bidform.as_p }}
+                        <input type="submit" value="Bid!">
+                    </form>
+
+                    <form action="{% url 'comment' item.id %}" method="post">
+                        {% csrf_token %}
+                        {{ commentform.as_p }}
+                        <input type="submit" value="Comment">
+                    </form>
+
+                    {% if request.user.username == item.seller.username and not item.is_closed %}
+                        <form action ="{% url 'close_deal' item.id %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-success">
+                                Close the Deal!
+                            </button>
+                        </form>
+                    {% endif %}
+                    {% else %}
+                    <p><strong>Winning Bid: ${{ item.winning_bid}}</strong></p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        {% for comment in comments %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">User: {{ comment.user }}</h5>
+                    <p class="text-muted mb-1">Time{{ comment.timestamp }}</p>
+                    <p class="card-text">{{ comment.comment }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    <div>
+{% endblock %}
